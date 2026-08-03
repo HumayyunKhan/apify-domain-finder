@@ -146,11 +146,17 @@ async function notifySlack(summary) {
 // Returns normalised array of email objects or null on hard failure
 // -----------------------------------------------------------------------------
 
-async function searchDomain(domain, limit) {
+async function searchDomain(domain, limit, company_name) {
   const response = await withRetry(async () => {
+    const payload = { domain, limit };
+    if (company_name) {
+      payload.company_name = company_name;
+      payload.company = company_name;
+    }
+
     const res = await apiFetch('/email/domain', {
       method: 'POST',
-      body: JSON.stringify({ domain, limit }),
+      body: JSON.stringify(payload),
     });
 
     if (res.status === 429) throw new Error('Rate limited');
@@ -170,7 +176,7 @@ async function searchDomain(domain, limit) {
   // Normalise: API returns { domain, organization, total, limit, contacts: [...] }
   const raw = data.contacts ?? data.emails ?? data.data ?? data ?? [];
   const items = Array.isArray(raw) ? raw : [];
-  const orgName = data.organization?.trim() || null;
+  const orgName = data.organization?.trim() || company_name || null;
 
   // Normalise each item to a consistent shape (API returns camelCase fields)
   return items.map((item) => {
@@ -179,7 +185,7 @@ async function searchDomain(domain, limit) {
         email: item.trim(),
         first_name: null,
         last_name: null,
-        company: orgName,
+        company_name: orgName,
         job_title: null,
         department: null,
         seniority: null,
@@ -194,7 +200,7 @@ async function searchDomain(domain, limit) {
       email: cleanStr(item.email),
       first_name: cleanStr(item.firstName ?? item.first_name),
       last_name: cleanStr(item.lastName ?? item.last_name),
-      company: cleanStr(item.company) ?? orgName,
+      company_name: cleanStr(item.company) ?? cleanStr(item.company_name) ?? orgName,
       job_title: cleanStr(item.jobTitle ?? item.job_title),
       department: cleanStr(item.department),
       seniority: cleanStr(item.seniority),
@@ -238,6 +244,7 @@ try {
     .filter((d) => d.domain?.trim())
     .map((d) => ({
       domain: d.domain.trim().toLowerCase().replace(/^https?:\/\//i, '').replace(/\/$/, ''),
+      company_name: d.company_name?.trim() || d.companyName?.trim() || null,
       limit: Number(d.limit) > 0 ? Number(d.limit) : DEFAULT_LIMIT,
     }));
 
@@ -296,7 +303,7 @@ try {
     !timeoutAt || (timeoutAt - Date.now()) > MIN_TIME_PER_DOMAIN_MS;
 
   // ── Process domains sequentially ─────────────────────────────────────────
-  for (const { domain, limit } of validDomains) {
+  for (const { domain, limit, company_name } of validDomains) {
     if (capReached) {
       log.warning('Spend cap reached from previous charge — skipping remaining domains.');
       break;
@@ -315,22 +322,28 @@ try {
       break;
     }
 
-    log.info(`Searching domain: ${domain} (limit: ${limit})...`);
+    log.info(`Searching domain: ${domain}${company_name ? ` (${company_name})` : ''} (limit: ${limit})...`);
 
     // ── Call domain email search API ──────────────────────────────────────────
     let emails = [];
     try {
-      emails = await searchDomain(domain, limit);
+      emails = await searchDomain(domain, limit, company_name);
       counters.searched++;
     } catch (err) {
       log.error(`Domain "${domain}" lookup failed: ${err.message}`);
       await dataset.pushData({
         domain,
-        email: null, first_name: null, last_name: null,
-        company: null, job_title: null, department: null,
-        seniority: null, linkedin_url: null,
+        company_name: company_name ?? null,
+        email: null,
+        first_name: null,
+        last_name: null,
+        job_title: null,
+        department: null,
+        seniority: null,
+        linkedin_url: null,
         email_status: 'Lookup failed',
-        found: false, charged: false,
+        found: false,
+        charged: false,
       });
       counters.failed++;
       continue;
@@ -341,11 +354,17 @@ try {
       log.info(`No emails found for ${domain}.`);
       await dataset.pushData({
         domain,
-        email: null, first_name: null, last_name: null,
-        company: null, job_title: null, department: null,
-        seniority: null, linkedin_url: null,
+        company_name: company_name ?? null,
+        email: null,
+        first_name: null,
+        last_name: null,
+        job_title: null,
+        department: null,
+        seniority: null,
+        linkedin_url: null,
         email_status: 'Not found',
-        found: false, charged: false,
+        found: false,
+        charged: false,
       });
       continue;
     }
@@ -383,10 +402,10 @@ try {
 
       await dataset.pushData({
         domain,
+        company_name: item.company_name ?? company_name ?? null,
         email: item.email ?? null,
         first_name: item.first_name ?? null,
         last_name: item.last_name ?? null,
-        company: item.company ?? null,
         job_title: item.job_title ?? null,
         department: item.department ?? null,
         seniority: item.seniority ?? null,

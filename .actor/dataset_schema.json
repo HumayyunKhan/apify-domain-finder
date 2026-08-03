@@ -7,10 +7,10 @@
             "transformation": {
                 "fields": [
                     "domain",
+                    "company_name",
                     "email",
                     "first_name",
                     "last_name",
-                    "company",
                     "job_title",
                     "department",
                     "seniority",
@@ -27,6 +27,10 @@
                         "label": "Domain",
                         "format": "text"
                     },
+                    "company_name": {
+                        "label": "Company Name",
+                        "format": "text"
+                    },
                     "email": {
                         "label": "Email",
                         "format": "text"
@@ -37,10 +41,6 @@
                     },
                     "last_name": {
                         "label": "Last Name",
-                        "format": "text"
-                    },
-                    "company": {
-                        "label": "Company",
                         "format": "text"
                     },
                     "job_title": {

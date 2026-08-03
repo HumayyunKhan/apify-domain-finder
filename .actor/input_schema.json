@@ -7,7 +7,7 @@
         "domains": {
             "title": "Domain List",
             "type": "array",
-            "description": "List of domains to search. Each entry requires a domain and an optional limit (default: 10).",
+            "description": "List of domains to search. Each entry requires a domain, with optional company_name and limit (default: 10).",
             "editor": "json",
             "items": {
                 "type": "object",
@@ -15,7 +15,12 @@
                     "domain": {
                         "title": "Domain",
                         "type": "string",
-                        "description": "The company domain to search, e.g. acmecorp.com"
+                        "description": "The company domain to search, e.g. acmecorp.com (required)"
+                    },
+                    "company_name": {
+                        "title": "Company Name",
+                        "type": "string",
+                        "description": "Company name — optional, helps improve matching accuracy"
                     },
                     "limit": {
                         "title": "Email Limit",
@@ -33,10 +38,12 @@
             "prefill": [
                 {
                     "domain": "thescalelab.com",
+                    "company_name": "The Scalelab",
                     "limit": 10
                 },
                 {
                     "domain": "scalelist.com",
+                    "company_name": "Scalelist",
                     "limit": 25
                 }
             ]
