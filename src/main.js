@@ -297,8 +297,13 @@ try {
 
   // ── Process domains sequentially ─────────────────────────────────────────
   for (const { domain, limit } of validDomains) {
-    if (capReached || counters.charged >= maxEmailsAffordable) {
-      log.warning(`Budget cap reached (${counters.charged}/${maxEmailsAffordable} emails charged) — skipping remaining domains.`);
+    if (capReached) {
+      log.warning('Spend cap reached from previous charge — skipping remaining domains.');
+      break;
+    }
+
+    if (counters.charged >= maxEmailsAffordable) {
+      log.warning(`Budget exhausted (${counters.charged}/${maxEmailsAffordable} emails charged) — stopping before next domain.`);
       break;
     }
 
