@@ -167,32 +167,41 @@ async function searchDomain(domain, limit) {
   const data = await response.json();
   // console.log(data);
 
-  // Normalise: API may return { emails: [...] }, { data: [...] }, or a raw array
-  const raw = data.contacts ?? data.contacts ?? data ?? [];
+  // Normalise: API returns { domain, organization, total, limit, contacts: [...] }
+  const raw = data.contacts ?? data.emails ?? data.data ?? data ?? [];
   const items = Array.isArray(raw) ? raw : [];
+  const orgName = data.organization?.trim() || null;
 
   // Normalise each item to a consistent shape (API returns camelCase fields)
-  return items.map((item) =>
-    typeof item === 'string'
-      ? {
-        email: item,
-        first_name: null, last_name: null,
-        company: null, job_title: null, department: null,
-        seniority: null, linkedin_url: null,
+  return items.map((item) => {
+    if (typeof item === 'string') {
+      return {
+        email: item.trim(),
+        first_name: null,
+        last_name: null,
+        company: orgName,
+        job_title: null,
+        department: null,
+        seniority: null,
+        linkedin_url: null,
         status: 'Found',
-      }
-      : {
-        email: item.email ?? null,
-        first_name: item.firstName ?? item.first_name ?? null,
-        last_name: item.lastName ?? item.last_name ?? null,
-        company: item.company ?? null,
-        job_title: item.jobTitle ?? item.job_title ?? null,
-        department: item.department ?? null,
-        seniority: item.seniority ?? null,
-        linkedin_url: item.linkedinUrl ?? item.linkedin_url ?? null,
-        status: item.status ?? 'Found',
-      }
-  );
+      };
+    }
+
+    const cleanStr = (val) => (typeof val === 'string' && val.trim().length > 0 ? val.trim() : null);
+
+    return {
+      email: cleanStr(item.email),
+      first_name: cleanStr(item.firstName ?? item.first_name),
+      last_name: cleanStr(item.lastName ?? item.last_name),
+      company: cleanStr(item.company) ?? orgName,
+      job_title: cleanStr(item.jobTitle ?? item.job_title),
+      department: cleanStr(item.department),
+      seniority: cleanStr(item.seniority),
+      linkedin_url: cleanStr(item.linkedinUrl ?? item.linkedin_url),
+      status: cleanStr(item.status) ?? cleanStr(item.result) ?? 'Found',
+    };
+  });
 }
 
 // -----------------------------------------------------------------------------
@@ -236,12 +245,14 @@ try {
     throw new Error('No valid domains provided. Each entry requires a "domain" field.');
   }
 
-  // ── Budget check — no upfront truncation since we don't know hit count per domain ──
-  // The cap is enforced by Actor.charge() after each domain's results arrive.
-  // We still check RESERVE_USD to ensure the cap isn't already exhausted by compute.
+  // ── Budget check & estimation ─────────────────────────────────────────────
   const pricingInfo = Actor.getChargingManager().getPricingInfo();
   const maxRunCost = pricingInfo.maxTotalChargeUsd;
   const perEmailCost = pricingInfo.perEventPrices[EVENT_NAME] ?? 0;
+
+  const maxEmailsAffordable = maxRunCost > 0 && perEmailCost > 0
+    ? Math.floor((maxRunCost - RESERVE_USD) / perEmailCost)
+    : Infinity;
 
   if (maxRunCost > 0 && perEmailCost > 0) {
     const available = maxRunCost - RESERVE_USD;
@@ -253,7 +264,7 @@ try {
       await Actor.exit();
     }
     log.info(
-      `Budget: max=$${maxRunCost.toFixed(2)} | reserve=$${RESERVE_USD} | per-email=$${perEmailCost.toFixed(4)}`
+      `Budget: max=$${maxRunCost.toFixed(2)} | reserve=$${RESERVE_USD} | per-email=$${perEmailCost.toFixed(4)} → max emails affordable: ${maxEmailsAffordable}`
     );
   } else {
     log.info('No budget cap set — processing all domains.');
@@ -286,8 +297,8 @@ try {
 
   // ── Process domains sequentially ─────────────────────────────────────────
   for (const { domain, limit } of validDomains) {
-    if (capReached) {
-      log.warning(`Charge cap reached — skipping remaining domains.`);
+    if (capReached || counters.charged >= maxEmailsAffordable) {
+      log.warning(`Budget cap reached (${counters.charged}/${maxEmailsAffordable} emails charged) — skipping remaining domains.`);
       break;
     }
 
