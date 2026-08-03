@@ -1,0 +1,38 @@
+{
+    "title": "Domain Email Finder by Scalelist",
+    "description": "Provide a list of domains to search. You are charged per email found.",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "domains": {
+            "title": "Domain List",
+            "type": "array",
+            "description": "List of domains to search. Each entry requires a domain and an optional limit (default: 10).",
+            "editor": "json",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "title": "Domain",
+                        "type": "string",
+                        "description": "The company domain to search, e.g. acmecorp.com"
+                    },
+                    "limit": {
+                        "title": "Email Limit",
+                        "type": "integer",
+                        "description": "Maximum number of emails to return for this domain. Defaults to 10.",
+                        "minimum": 1,
+                        "maximum": 100,
+                        "default": 10
+                    }
+                },
+                "required": ["domain"]
+            },
+            "prefill": [
+                { "domain": "acmecorp.com", "limit": 10 },
+                { "domain": "example.com", "limit": 25 }
+            ]
+        }
+    },
+    "required": ["domains"]
+}

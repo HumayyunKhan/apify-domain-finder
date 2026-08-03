@@ -1,0 +1,78 @@
+{
+    "actorSpecification": 1,
+    "fields": {},
+    "views": {
+        "overview": {
+            "title": "Domain Email Results",
+            "transformation": {
+                "fields": [
+                    "domain",
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "company",
+                    "job_title",
+                    "department",
+                    "seniority",
+                    "linkedin_url",
+                    "email_status",
+                    "found",
+                    "charged"
+                ]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "domain": {
+                        "label": "Domain",
+                        "format": "text"
+                    },
+                    "email": {
+                        "label": "Email",
+                        "format": "text"
+                    },
+                    "first_name": {
+                        "label": "First Name",
+                        "format": "text"
+                    },
+                    "last_name": {
+                        "label": "Last Name",
+                        "format": "text"
+                    },
+                    "company": {
+                        "label": "Company",
+                        "format": "text"
+                    },
+                    "job_title": {
+                        "label": "Job Title",
+                        "format": "text"
+                    },
+                    "department": {
+                        "label": "Department",
+                        "format": "text"
+                    },
+                    "seniority": {
+                        "label": "Seniority",
+                        "format": "text"
+                    },
+                    "linkedin_url": {
+                        "label": "LinkedIn",
+                        "format": "link"
+                    },
+                    "email_status": {
+                        "label": "Status",
+                        "format": "text"
+                    },
+                    "found": {
+                        "label": "Found",
+                        "format": "boolean"
+                    },
+                    "charged": {
+                        "label": "Charged",
+                        "format": "boolean"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "name": "scalelist-domain-email-finder",
+    "version": "0.0.1",
+    "type": "module",
+    "description": "Apify Actor: Domain Email Finder powered by Scalelist",
+    "main": "src/main.js",
+    "scripts": {
+        "start": "node src/main.js",
+        "dev": "apify run"
+    },
+    "dependencies": {
+        "apify": "^3.4.2"
+    },
+    "engines": {
+        "node": ">=20"
+    }
+}
