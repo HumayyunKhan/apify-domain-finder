@@ -156,7 +156,7 @@ async function searchDomain(domain, limit) {
     if (res.status === 429) throw new Error('Rate limited');
     if (res.status === 400) {
       const body = await res.text();
-      console.log(body);
+      // console.log(body);
       throw new Error(`Bad request: ${body}`);
     }
     if (!res.ok) throw new Error(`Domain search failed (HTTP ${res.status})`);
@@ -165,10 +165,10 @@ async function searchDomain(domain, limit) {
   });
 
   const data = await response.json();
-  console.log(data);
+  // console.log(data);
 
   // Normalise: API may return { emails: [...] }, { data: [...] }, or a raw array
-  const raw = data.emails ?? data.data ?? data ?? [];
+  const raw = data.contacts ?? data.contacts ?? data ?? [];
   const items = Array.isArray(raw) ? raw : [];
 
   // Normalise each item to a consistent shape (API returns camelCase fields)
