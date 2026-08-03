@@ -26,13 +26,23 @@
                         "default": 10
                     }
                 },
-                "required": ["domain"]
+                "required": [
+                    "domain"
+                ]
             },
             "prefill": [
-                { "domain": "acmecorp.com", "limit": 10 },
-                { "domain": "example.com", "limit": 25 }
+                {
+                    "domain": "thescalelab.com",
+                    "limit": 10
+                },
+                {
+                    "domain": "scalelist.com",
+                    "limit": 25
+                }
             ]
         }
     },
-    "required": ["domains"]
+    "required": [
+        "domains"
+    ]
 }
