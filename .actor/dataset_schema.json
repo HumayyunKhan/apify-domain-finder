@@ -16,8 +16,7 @@
                     "seniority",
                     "linkedin_url",
                     "email_status",
-                    "found",
-                    "charged"
+                    "found"
                 ]
             },
             "display": {
@@ -65,10 +64,6 @@
                     },
                     "found": {
                         "label": "Found",
-                        "format": "boolean"
-                    },
-                    "charged": {
-                        "label": "Charged",
                         "format": "boolean"
                     }
                 }

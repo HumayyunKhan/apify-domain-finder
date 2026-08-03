@@ -343,7 +343,7 @@ try {
         linkedin_url: null,
         email_status: 'Lookup failed',
         found: false,
-        charged: false,
+        // charged: false,
       });
       counters.failed++;
       continue;
@@ -364,7 +364,7 @@ try {
         linkedin_url: null,
         email_status: 'Not found',
         found: false,
-        charged: false,
+        // charged: false,
       });
       continue;
     }
@@ -412,7 +412,7 @@ try {
         linkedin_url: item.linkedin_url ?? null,
         email_status: charged ? (item.status ?? 'Found') : 'Charge limit reached',
         found: !!item.email,
-        charged,
+        // charged,
       });
     }
 
