@@ -156,6 +156,7 @@ async function searchDomain(domain, limit) {
     if (res.status === 429) throw new Error('Rate limited');
     if (res.status === 400) {
       const body = await res.text();
+      console.log(body);
       throw new Error(`Bad request: ${body}`);
     }
     if (!res.ok) throw new Error(`Domain search failed (HTTP ${res.status})`);
@@ -164,6 +165,7 @@ async function searchDomain(domain, limit) {
   });
 
   const data = await response.json();
+  console.log(data);
 
   // Normalise: API may return { emails: [...] }, { data: [...] }, or a raw array
   const raw = data.emails ?? data.data ?? data ?? [];
@@ -173,23 +175,23 @@ async function searchDomain(domain, limit) {
   return items.map((item) =>
     typeof item === 'string'
       ? {
-          email: item,
-          first_name: null, last_name: null,
-          company: null, job_title: null, department: null,
-          seniority: null, linkedin_url: null,
-          status: 'Found',
-        }
+        email: item,
+        first_name: null, last_name: null,
+        company: null, job_title: null, department: null,
+        seniority: null, linkedin_url: null,
+        status: 'Found',
+      }
       : {
-          email      : item.email ?? null,
-          first_name : item.firstName ?? item.first_name ?? null,
-          last_name  : item.lastName  ?? item.last_name  ?? null,
-          company    : item.company   ?? null,
-          job_title  : item.jobTitle  ?? item.job_title  ?? null,
-          department : item.department ?? null,
-          seniority  : item.seniority  ?? null,
-          linkedin_url: item.linkedinUrl ?? item.linkedin_url ?? null,
-          status     : item.status ?? 'Found',
-        }
+        email: item.email ?? null,
+        first_name: item.firstName ?? item.first_name ?? null,
+        last_name: item.lastName ?? item.last_name ?? null,
+        company: item.company ?? null,
+        job_title: item.jobTitle ?? item.job_title ?? null,
+        department: item.department ?? null,
+        seniority: item.seniority ?? null,
+        linkedin_url: item.linkedinUrl ?? item.linkedin_url ?? null,
+        status: item.status ?? 'Found',
+      }
   );
 }
 
@@ -365,16 +367,16 @@ try {
 
       await dataset.pushData({
         domain,
-        email        : item.email       ?? null,
-        first_name   : item.first_name  ?? null,
-        last_name    : item.last_name   ?? null,
-        company      : item.company     ?? null,
-        job_title    : item.job_title   ?? null,
-        department   : item.department  ?? null,
-        seniority    : item.seniority   ?? null,
-        linkedin_url : item.linkedin_url ?? null,
-        email_status : charged ? (item.status ?? 'Found') : 'Charge limit reached',
-        found        : !!item.email,
+        email: item.email ?? null,
+        first_name: item.first_name ?? null,
+        last_name: item.last_name ?? null,
+        company: item.company ?? null,
+        job_title: item.job_title ?? null,
+        department: item.department ?? null,
+        seniority: item.seniority ?? null,
+        linkedin_url: item.linkedin_url ?? null,
+        email_status: charged ? (item.status ?? 'Found') : 'Charge limit reached',
+        found: !!item.email,
         charged,
       });
     }
