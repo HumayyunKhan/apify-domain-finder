@@ -8,24 +8,27 @@
             "title": "Domain List",
             "type": "array",
             "description": "List of domains to search. Each entry requires a domain, with optional company_name and limit (default: 10).",
-            "editor": "json",
+            "editor": "schemaBased",
             "items": {
                 "type": "object",
                 "properties": {
                     "domain": {
                         "title": "Domain",
                         "type": "string",
-                        "description": "The company domain to search, e.g. acmecorp.com (required)"
+                        "description": "The company domain to search, e.g. acmecorp.com (required)",
+                        "editor": "textfield"
                     },
                     "company_name": {
                         "title": "Company Name",
                         "type": "string",
-                        "description": "Company name — optional, helps improve matching accuracy"
+                        "description": "Company name — optional, helps improve matching accuracy",
+                        "editor": "textfield"
                     },
                     "limit": {
                         "title": "Email Limit",
                         "type": "integer",
                         "description": "Maximum number of emails to return for this domain. Defaults to 10.",
+                        "editor": "number",
                         "minimum": 1,
                         "maximum": 100,
                         "default": 10
