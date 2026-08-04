@@ -228,11 +228,13 @@ try {
     throw new Error('Missing SCALELIST_API_KEY environment variable. Contact support.');
   }
 
-  const { domains } = (await Actor.getInput()) ?? {};
+  const { domains, limit: inputLimit } = (await Actor.getInput()) ?? {};
 
   if (!Array.isArray(domains) || domains.length === 0) {
     throw new Error('Input "domains" must be a non-empty array.');
   }
+
+  const globalLimit = Number(inputLimit) > 0 ? Number(inputLimit) : DEFAULT_LIMIT;
 
   // ── Input validation ──────────────────────────────────────────────────────
   const invalidEntries = domains.filter((d) => !d.domain?.trim());
@@ -245,7 +247,7 @@ try {
     .map((d) => ({
       domain: d.domain.trim().toLowerCase().replace(/^https?:\/\//i, '').replace(/\/$/, ''),
       company_name: d.company_name?.trim() || d.companyName?.trim() || null,
-      limit: Number(d.limit) > 0 ? Number(d.limit) : DEFAULT_LIMIT,
+      limit: Number(d.limit) > 0 ? Number(d.limit) : globalLimit,
     }));
 
   if (validDomains.length === 0) {
